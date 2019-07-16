@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
 from django.db import models
-#from api_calling import insertevents
 from tasks import setappointment
 import datetime   
 import pickle
@@ -38,7 +36,6 @@ class Assignementdata(models.Model):
     assigned_start_time =models.DateTimeField()
     assigned_end_time =models.DateTimeField()
     event_id = models.CharField(max_length=100,blank=True)
-
     def save_calendar_event(self):
 
         email=self.userID.personal_email
@@ -81,12 +78,11 @@ class Assignementdata(models.Model):
         count=available_record.count()
         for i in range(count):  
             if(self.assigned_start_time >= available_record[i].available_start_time and self.assigned_end_time <available_record[i].available_end_time):
-                if 'test_flag' in kwargs and kwargs["test_flag"] != True:
-                    setappointment.delay(self.id)
-                else:
-                    if 'test_flag' in kwargs:
-                        del(kwargs["test_flag"])
+                if 'test_flag' in kwargs and kwargs["test_flag"] == True:
                     super(Assignementdata,self).save(*args,**kwargs)
+                else:
+                    setappointment.delay(self.id)
+                    
             else:
                 print("User is not available for the given timeslot")
         
