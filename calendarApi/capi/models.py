@@ -7,7 +7,6 @@ import pickle
 import os.path
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
 from django.core.files import File
 import json
 
@@ -43,10 +42,13 @@ class Assignementdata(models.Model):
         end_time=self.assigned_end_time.isoformat()
 
         scopes = ['https://www.googleapis.com/auth/calendar']
-        # flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", scopes=scopes)
-        # credentials = flow.run_console()
-        # pickle.dump(credentials, open("token.pkl", "wb"))
-        credentials = pickle.load(open("token.pkl", "rb"))
+        if os.path.exists("token.pkl"):
+            credentials = pickle.load(open("token.pkl", "rb"))
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", scopes=scopes)
+            credentials = flow.run_console()
+            pickle.dump(credentials, open("token.pkl", "wb"))
+        
         service = build("calendar", "v3", credentials=credentials)
 
         event = {
